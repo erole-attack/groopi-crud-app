@@ -95,8 +95,9 @@ export class ReleasesService {
   }
 
   deleteRelease(additon_id: string): void {
+    const found = this.getReleaseById(additon_id);
     this.releases = this.releases.filter(
-      (release) => release.additon_id !== additon_id,
+      (release) => release.additon_id !== found.additon_id,
     );
   }
 }
