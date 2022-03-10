@@ -16,7 +16,7 @@ export class ReleasesController {
   constructor(private releasesService: ReleasesService) {}
 
   @Post()
-  createTask(@Body() createReleaseDto: CreateReleaseDto): Release {
+  createRelease(@Body() createReleaseDto: CreateReleaseDto): Release {
     return this.releasesService.createRelease(createReleaseDto);
   }
 

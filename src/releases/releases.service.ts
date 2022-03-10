@@ -1,6 +1,7 @@
+import { Details, Release } from './release.model';
+
 import { CreateReleaseDto } from './dto/create-release.dto';
 import { Injectable } from '@nestjs/common';
-import { Release } from './release.model';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -21,12 +22,17 @@ export class ReleasesService {
       thumbnail,
       cover_image,
     } = createReleaseDto;
+    const { country, year } = details;
+    const releaseDetails: Details = {
+      country,
+      year,
+    };
     const release: Release = {
       additon_id: uuidv4(),
       timestamp: new Date().toISOString(),
       release_title,
       artist,
-      details,
+      details: releaseDetails,
       genres,
       formats,
       labels,

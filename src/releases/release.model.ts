@@ -3,7 +3,7 @@ export interface Release {
   timestamp: string;
   release_title: string;
   artist: string;
-  details: { country: string; year: number };
+  details: Details;
   genres: string[];
   formats: string[];
   labels: string[];
@@ -12,4 +12,9 @@ export interface Release {
   master_id: string;
   thumbnail: string;
   cover_image: string;
+}
+
+export interface Details {
+  country: string;
+  year: string;
 }
