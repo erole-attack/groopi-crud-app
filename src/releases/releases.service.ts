@@ -49,6 +49,37 @@ export class ReleasesService {
     return this.releases.find((release) => release.additon_id === additon_id);
   }
 
+  updateRelease(additon_id: string, createReleaseDto: CreateReleaseDto) {
+    const release = this.getReleaseById(additon_id);
+    const {
+      release_title,
+      artist,
+      details,
+      genres,
+      formats,
+      labels,
+      styles,
+      uri,
+      master_id,
+      thumbnail,
+      cover_image,
+    } = createReleaseDto;
+
+    release_title && (release.release_title = release_title);
+    artist && (release.artist = artist);
+    details && (release.details = details);
+    genres && (release.genres = genres);
+    formats && (release.formats = formats);
+    labels && (release.labels = labels);
+    styles && (release.styles = styles);
+    uri && (release.uri = uri);
+    master_id && (release.master_id = master_id);
+    labels && (release.thumbnail = thumbnail);
+    styles && (release.cover_image = cover_image);
+
+    return release;
+  }
+
   deleteRelease(additon_id: string): void {
     this.releases = this.releases.filter(
       (release) => release.additon_id !== additon_id,

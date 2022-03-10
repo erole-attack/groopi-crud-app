@@ -1,4 +1,12 @@
-import { Body, Controller, Post, Get, Param, Delete } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Get,
+  Param,
+  Delete,
+  Patch,
+} from '@nestjs/common';
 import { ReleasesService } from './releases.service';
 import { Release } from './release.model';
 import { CreateReleaseDto } from './dto/create-release.dto';
@@ -20,6 +28,14 @@ export class ReleasesController {
   @Get('/:additon_id')
   getReleaseById(@Param('additon_id') additon_id: string): Release {
     return this.releasesService.getReleaseById(additon_id);
+  }
+
+  @Patch('/:additon_id')
+  updateRelease(
+    @Param('additon_id') additon_id: string,
+    @Body() createReleaseDto: CreateReleaseDto,
+  ) {
+    return this.releasesService.updateRelease(additon_id, createReleaseDto);
   }
 
   @Delete('/:additon_id')
