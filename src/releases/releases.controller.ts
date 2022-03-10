@@ -20,6 +20,11 @@ export class ReleasesController {
     return this.releasesService.createRelease(createReleaseDto);
   }
 
+  @Get('/fetch')
+  async fetchReleases() {
+    return await this.releasesService.fetchReleases();
+  }
+
   @Get()
   getAllReleases() {
     return this.releasesService.getAllReleases();

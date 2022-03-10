@@ -1,12 +1,37 @@
 import { Details, Release } from './release.model';
 import { Injectable, NotFoundException } from '@nestjs/common';
 
+import { AxiosRequestConfig } from 'axios';
 import { CreateReleaseDto } from './dto/create-release.dto';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class ReleasesService {
   private releases: Release[] = [];
+
+  constructor(private httpService: HttpService) {}
+  async fetchReleases(): Promise<any> {
+    const axiosConfig: AxiosRequestConfig = {
+      method: 'get',
+      url:
+        'https://api.discogs.com/database/search?year=2020&format=vinyl&type=master&genre=Rock&per_page=100&page=1&token=' +
+        process.env.DISCOGS_TOKEN,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      validateStatus: function (status: number) {
+        return status === 200;
+      },
+    };
+
+    return firstValueFrom(this.httpService.request(axiosConfig))
+      .then((res) => res.data)
+      .catch(() => {
+        throw new Error('internal communication error');
+      });
+  }
 
   createRelease(createReleaseDto: CreateReleaseDto): Release {
     const {
