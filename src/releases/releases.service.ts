@@ -1,7 +1,7 @@
 import { Details, Release } from './release.model';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { CreateReleaseDto } from './dto/create-release.dto';
-import { Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -52,7 +52,15 @@ export class ReleasesService {
   }
 
   getReleaseById(additon_id: string): Release {
-    return this.releases.find((release) => release.additon_id === additon_id);
+    const found = this.releases.find(
+      (release) => release.additon_id === additon_id,
+    );
+
+    if (!found) {
+      throw new NotFoundException(`Release with ID ${additon_id} not found`);
+    }
+
+    return found;
   }
 
   updateRelease(additon_id: string, createReleaseDto: CreateReleaseDto) {
