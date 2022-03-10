@@ -48,4 +48,10 @@ export class ReleasesService {
   getReleaseById(additon_id: string): Release {
     return this.releases.find((release) => release.additon_id === additon_id);
   }
+
+  deleteRelease(additon_id: string): void {
+    this.releases = this.releases.filter(
+      (release) => release.additon_id !== additon_id,
+    );
+  }
 }
