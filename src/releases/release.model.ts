@@ -4,10 +4,10 @@ export interface Release {
   release_title: string;
   artist: string;
   details: { country: string; year: number };
-  genre: string[];
-  format: string[];
-  label: string[];
-  style: string[];
+  genres: string[];
+  formats: string[];
+  labels: string[];
+  styles: string[];
   uri: string;
   master_id: string;
   thumbnail: string;
