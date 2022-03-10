@@ -38,4 +38,8 @@ export class ReleasesService {
     this.releases.push(release);
     return release;
   }
+
+  getAllReleases() {
+    return this.releases;
+  }
 }

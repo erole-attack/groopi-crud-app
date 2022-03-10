@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Get } from '@nestjs/common';
 import { ReleasesService } from './releases.service';
 import { Release } from './release.model';
 
@@ -33,5 +33,10 @@ export class ReleasesController {
       thumbnail,
       cover_image,
     );
+  }
+
+  @Get()
+  getAllReleases() {
+    return this.releasesService.getAllReleases();
   }
 }
