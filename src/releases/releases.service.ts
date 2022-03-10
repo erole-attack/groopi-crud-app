@@ -44,4 +44,8 @@ export class ReleasesService {
   getAllReleases() {
     return this.releases;
   }
+
+  getReleaseById(additon_id: string): Release {
+    return this.releases.find((release) => release.additon_id === additon_id);
+  }
 }

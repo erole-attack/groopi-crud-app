@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Get } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param } from '@nestjs/common';
 import { ReleasesService } from './releases.service';
 import { Release } from './release.model';
 import { CreateReleaseDto } from './dto/create-release.dto';
@@ -15,5 +15,10 @@ export class ReleasesController {
   @Get()
   getAllReleases() {
     return this.releasesService.getAllReleases();
+  }
+
+  @Get('/:additon_id')
+  getReleaseById(@Param('additon_id') additon_id: string): Release {
+    return this.releasesService.getReleaseById(additon_id);
   }
 }
