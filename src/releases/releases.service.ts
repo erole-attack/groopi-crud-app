@@ -26,11 +26,55 @@ export class ReleasesService {
       },
     };
 
-    return firstValueFrom(this.httpService.request(axiosConfig))
+    const fetchedReleases = firstValueFrom(
+      this.httpService.request(axiosConfig),
+    )
       .then((res) => res.data)
       .catch(() => {
         throw new Error('internal communication error');
       });
+
+    const { results } = await fetchedReleases;
+
+    results.forEach((release: any) => {
+      const {
+        country,
+        title,
+        year,
+        genre,
+        format,
+        label,
+        style,
+        uri,
+        master_id,
+        cover_image,
+        thumb,
+      } = release;
+      const details: Details = {
+        country: country,
+        year: year,
+      };
+      const release_title = title.split('-')[1].trim();
+      const artist = title
+        .split('-')[0]
+        .replace(/([(0-9)])+/g, '')
+        .trim();
+      const createReleaseDto: CreateReleaseDto = {
+        release_title,
+        artist,
+        details,
+        genres: genre,
+        formats: format,
+        labels: label,
+        styles: style,
+        uri,
+        master_id,
+        thumbnail: thumb,
+        cover_image,
+      };
+
+      this.createRelease(createReleaseDto);
+    });
   }
 
   createRelease(createReleaseDto: CreateReleaseDto): Release {
