@@ -13,68 +13,73 @@ export class ReleasesService {
 
   constructor(private httpService: HttpService) {}
   async fetchReleases(): Promise<any> {
-    const axiosConfig: AxiosRequestConfig = {
-      method: 'get',
-      url:
-        'https://api.discogs.com/database/search?year=2020&format=vinyl&type=master&genre=Rock&per_page=100&page=1&token=' +
-        process.env.DISCOGS_TOKEN,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      validateStatus: function (status: number) {
-        return status === 200;
-      },
+    const axiosConfig = (page: number): AxiosRequestConfig => {
+      return {
+        method: 'get',
+        url: `https://api.discogs.com/database/search?year=2020&format=vinyl&type=master&genre=Rock&per_page=100&page=${page}&token=${process.env.DISCOGS_TOKEN}`,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        validateStatus: function (status: number) {
+          return status === 200;
+        },
+      };
     };
 
-    const fetchedReleases = firstValueFrom(
-      this.httpService.request(axiosConfig),
-    )
-      .then((res) => res.data)
-      .catch(() => {
-        throw new Error('internal communication error');
+    const fetchedReleases = async (page: number) => {
+      return firstValueFrom(this.httpService.request(axiosConfig(page)))
+        .then((res) => res.data)
+        .catch(() => {
+          throw new Error('internal communication error');
+        });
+    };
+
+    const { pagination } = await fetchedReleases(1);
+    const { pages } = pagination;
+
+    for (let page = 1; page <= pages; page++) {
+      await new Promise((resolve) => setTimeout(resolve, 2400));
+      console.log(`fetching page ${page} from ${pages}`);
+      const { results } = await fetchedReleases(page);
+      results.forEach((release: any) => {
+        const {
+          country,
+          title,
+          year,
+          genre,
+          format,
+          label,
+          style,
+          uri,
+          master_id,
+          cover_image,
+          thumb,
+        } = release;
+        const details: Details = {
+          country: country,
+          year: year,
+        };
+        const release_title = title.split('-')[1].trim();
+        const artist = title
+          .split('-')[0]
+          .replace(/([(0-9)])+/g, '')
+          .trim();
+        const createReleaseDto: CreateReleaseDto = {
+          release_title,
+          artist,
+          details,
+          genres: genre,
+          formats: format,
+          labels: label,
+          styles: style,
+          uri,
+          master_id,
+          thumbnail: thumb,
+          cover_image,
+        };
+        this.createRelease(createReleaseDto);
       });
-
-    const { results } = await fetchedReleases;
-
-    results.forEach((release: any) => {
-      const {
-        country,
-        title,
-        year,
-        genre,
-        format,
-        label,
-        style,
-        uri,
-        master_id,
-        cover_image,
-        thumb,
-      } = release;
-      const details: Details = {
-        country: country,
-        year: year,
-      };
-      const release_title = title.split('-')[1].trim();
-      const artist = title
-        .split('-')[0]
-        .replace(/([(0-9)])+/g, '')
-        .trim();
-      const createReleaseDto: CreateReleaseDto = {
-        release_title,
-        artist,
-        details,
-        genres: genre,
-        formats: format,
-        labels: label,
-        styles: style,
-        uri,
-        master_id,
-        thumbnail: thumb,
-        cover_image,
-      };
-
-      this.createRelease(createReleaseDto);
-    });
+    }
   }
 
   createRelease(createReleaseDto: CreateReleaseDto): Release {
