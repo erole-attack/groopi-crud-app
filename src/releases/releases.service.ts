@@ -1,8 +1,9 @@
 import { Details, Release } from './release.model';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
 import { AxiosRequestConfig } from 'axios';
 import { CreateReleaseDto } from './dto/create-release.dto';
+import { Cron } from '@nestjs/schedule';
 import { Genre } from './genre.enum';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
@@ -13,6 +14,7 @@ export class ReleasesService {
   private releases: Release[] = [];
 
   constructor(private httpService: HttpService) {}
+  @Cron('0 */2 * * *')
   async fetchReleases(): Promise<any> {
     const axiosConfig = (genre: Genre, page: number): AxiosRequestConfig => {
       return {
@@ -36,10 +38,9 @@ export class ReleasesService {
     };
 
     for (let i = 0; i < Object.keys(Genre).length; i++) {
-      let { pagination } = await fetchedReleases(Object.values(Genre)[i], 1);
+      const { pagination } = await fetchedReleases(Object.values(Genre)[i], 1);
       const { pages } = pagination;
       for (let page = 1; page <= pages; page++) {
-        await new Promise((resolve) => setTimeout(resolve, 2400));
         const { results } = await fetchedReleases(
           Object.values(Genre)[i],
           page,
@@ -80,9 +81,14 @@ export class ReleasesService {
             thumbnail: thumb,
             cover_image,
           };
-          pagination = null;
           this.createRelease(createReleaseDto);
         });
+        new Logger(ReleasesService.name).log(
+          `Fetched ${
+            Object.values(Genre)[i]
+          } releases from page ${page} of ${pages}`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, 2400));
       }
     }
   }
