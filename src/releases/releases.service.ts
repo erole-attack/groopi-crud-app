@@ -3,6 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { AxiosRequestConfig } from 'axios';
 import { CreateReleaseDto } from './dto/create-release.dto';
+import { Genre } from './genre.enum';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
@@ -13,10 +14,10 @@ export class ReleasesService {
 
   constructor(private httpService: HttpService) {}
   async fetchReleases(): Promise<any> {
-    const axiosConfig = (page: number): AxiosRequestConfig => {
+    const axiosConfig = (genre: Genre, page: number): AxiosRequestConfig => {
       return {
         method: 'get',
-        url: `https://api.discogs.com/database/search?year=2020&format=vinyl&type=master&genre=Rock&per_page=100&page=${page}&token=${process.env.DISCOGS_TOKEN}`,
+        url: `https://api.discogs.com/database/search?year=2022&format=vinyl&type=master&genre=${genre}&per_page=100&page=${page}&token=${process.env.DISCOGS_TOKEN}`,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -26,59 +27,63 @@ export class ReleasesService {
       };
     };
 
-    const fetchedReleases = async (page: number) => {
-      return firstValueFrom(this.httpService.request(axiosConfig(page)))
+    const fetchedReleases = async (genre: Genre, page: number) => {
+      return firstValueFrom(this.httpService.request(axiosConfig(genre, page)))
         .then((res) => res.data)
         .catch(() => {
           throw new Error('internal communication error');
         });
     };
 
-    const { pagination } = await fetchedReleases(1);
-    const { pages } = pagination;
-
-    for (let page = 1; page <= pages; page++) {
-      await new Promise((resolve) => setTimeout(resolve, 2400));
-      console.log(`fetching page ${page} from ${pages}`);
-      const { results } = await fetchedReleases(page);
-      results.forEach((release: any) => {
-        const {
-          country,
-          title,
-          year,
-          genre,
-          format,
-          label,
-          style,
-          uri,
-          master_id,
-          cover_image,
-          thumb,
-        } = release;
-        const details: Details = {
-          country: country,
-          year: year,
-        };
-        const release_title = title.split('-')[1].trim();
-        const artist = title
-          .split('-')[0]
-          .replace(/([(0-9)])+/g, '')
-          .trim();
-        const createReleaseDto: CreateReleaseDto = {
-          release_title,
-          artist,
-          details,
-          genres: genre,
-          formats: format,
-          labels: label,
-          styles: style,
-          uri,
-          master_id,
-          thumbnail: thumb,
-          cover_image,
-        };
-        this.createRelease(createReleaseDto);
-      });
+    for (let i = 0; i < Object.keys(Genre).length; i++) {
+      let { pagination } = await fetchedReleases(Object.values(Genre)[i], 1);
+      const { pages } = pagination;
+      for (let page = 1; page <= pages; page++) {
+        await new Promise((resolve) => setTimeout(resolve, 2400));
+        const { results } = await fetchedReleases(
+          Object.values(Genre)[i],
+          page,
+        );
+        results.forEach((release: any) => {
+          const {
+            country,
+            title,
+            year,
+            genre,
+            format,
+            label,
+            style,
+            uri,
+            master_id,
+            cover_image,
+            thumb,
+          } = release;
+          const details: Details = {
+            country: country,
+            year: year,
+          };
+          const release_title = title.split('-')[1].trim();
+          const artist = title
+            .split('-')[0]
+            .replace(/([(0-9)])+/g, '')
+            .trim();
+          const createReleaseDto: CreateReleaseDto = {
+            release_title,
+            artist,
+            details,
+            genres: genre,
+            formats: format,
+            labels: label,
+            styles: style,
+            uri,
+            master_id,
+            thumbnail: thumb,
+            cover_image,
+          };
+          pagination = null;
+          this.createRelease(createReleaseDto);
+        });
+      }
     }
   }
 

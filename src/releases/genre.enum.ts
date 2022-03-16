@@ -1,0 +1,15 @@
+export enum Genre {
+  Rock = 'Rock',
+  Electronic = 'Electronic',
+  Pop = 'Pop',
+  FolkWorldAndCountry = 'Folk, World, & Country',
+  Jazz = 'Jazz',
+  FunkSoul = 'Funk / Soul',
+  Classical = 'Classical',
+  HipHop = 'Hip Hop',
+  Latin = 'Latin',
+  Reggae = 'Reggae',
+  StageAndScreen = 'Stage & Screen',
+  Blues = 'Blues',
+  NonMusic = 'Non-Music',
+}
